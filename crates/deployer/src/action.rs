@@ -20,6 +20,7 @@ pub struct DeploymentData {
 
 pub struct WriteData {
     address: Address,
+    function_sig: String,
     args: Vec<String>,
     value: B256,
     condition: Option<WriteCondition>,
@@ -47,13 +48,13 @@ pub struct ReadData {
     bytecode: Bytes,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Action {
-    action_type: ActionType,
-    depends_on: Vec<String>,
-    id: String,
-    name: String,
-    data: String,
-    inputs: Vec<String>,
-    outputs_schema: String,
+    pub action_type: ActionType,
+    pub depends_on: Vec<String>,
+    pub id: String,
+    pub name: String,
+    pub data: String,
+    pub inputs: Vec<String>,
+    pub outputs_schema: String,
 }
