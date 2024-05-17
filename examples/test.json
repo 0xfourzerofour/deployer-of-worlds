@@ -1,0 +1,35 @@
+{
+	"contracts": [
+		{
+			"id": "deploy_x_contract",
+			"depends_on": ["ids_of_other_actions"]
+			"type": "deploy",
+			"address": "0xexpected_address",
+			"salt": "0x..",
+			"bytecode": "0x..",
+			"abi": "0x..",
+			"constructor_args": ["0x...", "0xd..."],
+			"post_deploy_actions": [
+				{
+					"address": "0xexpected_address",
+					"function_sig": "addStake(uint32)",
+					"value": 10000000000000000,
+					"args": [
+						86400,
+					],
+					"if": {
+						"address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+						"function_sig": "getDepositInfo(address)",
+						"return_types": "uint112,bool,uint112,uint32,uint48",
+						"args": [
+							"self",
+						],
+						"condition": "lte",
+						"value": 10000000000000000,
+						"value_offset": 2,
+					}
+				}
+			]
+		}
+	]
+}

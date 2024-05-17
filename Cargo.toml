@@ -1,0 +1,20 @@
+[workspace]
+members = [ 
+  "bin",
+  "crates/*"
+]
+
+default-members = ["bin"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.76"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/0xfourzerofour/deployer-of-worlds"
+
+[workspace.dependencies]
+alloy = { git = "https://github.com/alloy-rs/alloy", version = "0.1.0", features = ["std", "contract", "providers"] }
+anyhow = "1.0.83"
+
