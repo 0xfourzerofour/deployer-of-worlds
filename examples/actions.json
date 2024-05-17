@@ -12,15 +12,16 @@
 				"constructor_args": ["0x...", "0xd..."],
 			},
 			"output_schema": {
-				
+			
 			},
 		},
 		{
 			"id": "add_stake_to_x_contract",
 			"depends_on": ["deploy_x_contract"]
+			"inputs": ["deploy_x_contract"]
 			"type": "write",
 			"data": {
-				"address": "0xexpected_address",
+				"address": "inputs.deploy_x_contract.address",
 				"function_sig": "addStake(uint32)",
 				"value": 10000000000000000,
 				"args": [
