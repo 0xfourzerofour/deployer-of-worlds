@@ -1,3 +1,3 @@
 pub struct Config {
-    pub contracts: Vec<Contract>,
+    pub actions: Vec<Actio>,
 }
