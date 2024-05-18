@@ -29,14 +29,26 @@ where
         Ok(())
     }
 
-    pub async fn register_actions(&mut self, actions: Vec<Action>) -> Result<()> {
-        // Build a dependency graph
+    pub fn register_actions(&mut self, actions: Vec<Action>) -> Result<()> {
+        let action_ids: HashMap<String, usize> = actions
+            .iter()
+            .enumerate()
+            .map(|(i, a)| (a.id.clone(), i))
+            .collect();
+
         let mut graph = HashMap::new();
-        let mut action_graph = HashMap::new();
 
         for action in &actions {
-            graph.insert(action.id.clone(), action.depends_on.clone());
-            action_graph.insert(action.id.clone(), action.clone());
+            let depends_on_ids: Vec<usize> = action
+                .depends_on
+                .iter()
+                .map(|i| *action_ids.get(i).expect("should be here"))
+                .collect();
+
+            graph.insert(
+                *action_ids.get(&action.id).expect("should be here"),
+                depends_on_ids,
+            );
         }
 
         // Perform topological sorting to find the execution order
@@ -50,8 +62,8 @@ where
         let mut ordered_list = vec![];
 
         for id in order {
-            let action = action_graph
-                .get(&id)
+            let action = actions
+                .get(id)
                 .expect("Action should be present after topological sort");
             ordered_list.push((*action).clone());
         }
@@ -62,7 +74,7 @@ where
 }
 
 // Helper function for topological sort
-fn topological_sort(graph: &HashMap<String, Vec<String>>) -> Result<Vec<String>, anyhow::Error> {
+fn topological_sort(graph: &HashMap<usize, Vec<usize>>) -> Result<Vec<usize>, anyhow::Error> {
     let mut in_degree = HashMap::new();
     let mut queue = VecDeque::new();
 

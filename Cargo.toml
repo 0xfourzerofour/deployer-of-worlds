@@ -15,6 +15,9 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/0xfourzerofour/deployer-of-worlds"
 
 [workspace.dependencies]
-alloy = { git = "https://github.com/alloy-rs/alloy", version = "0.1.0", features = ["std", "contract", "providers"] }
+alloy = { git = "https://github.com/alloy-rs/alloy", version = "0.1.0", features = ["std", "contract", "providers", "rpc-client"] }
 anyhow = "1.0.83"
+serde = "1.0.0"
+serde_json = "1.0.0"
+tokio = { version = "1.37.0", features = ["full"] }
 
