@@ -58,3 +58,7 @@ pub struct Action {
     pub inputs: Vec<String>,
     pub outputs_schema: String,
 }
+
+pub fn load_actions(path: &str) -> Vec<Action> {
+    return vec![];
+}
