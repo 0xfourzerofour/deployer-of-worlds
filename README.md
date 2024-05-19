@@ -37,7 +37,7 @@ A config driven smart contract deployment and execution framework for repeatable
 		"action_data": {
 			"type": "write",
 			"content": {
-				"address": "inputs.deploy_contract",
+				"address": "${deploy_contract}",
 				"abi":   {
 			    "type": "constructor",
 			    "payable": false,
