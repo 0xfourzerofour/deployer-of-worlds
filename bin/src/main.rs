@@ -14,9 +14,8 @@ async fn main() -> Result<()> {
     let provider = ProviderBuilder::new().on_client(client);
     let mut executor = Executor::new(provider.boxed());
     let actions = load_actions("./examples/actions.json")?;
-    println!("{:?}", actions);
-    // executor.register_actions(actions)?;
-    // executor.execute_actions().await?;
+    executor.register_actions(actions);
+    executor.execute_actions().await?;
 
     Ok(())
 }
