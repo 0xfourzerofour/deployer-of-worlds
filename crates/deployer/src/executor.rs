@@ -1,5 +1,6 @@
 use anyhow::Result;
-use std::sync::Arc;
+use jq_rs::run;
+use std::{collections::HashMap, sync::Arc};
 
 use alloy::providers::Provider;
 
@@ -23,7 +24,14 @@ where
     }
 
     pub async fn execute_actions(&self) -> Result<()> {
+        let mut output_data = HashMap::new();
         for action in &self.actions {
+            if let Some(inputs) = action.inputs {
+                for input in inputs {
+                    let input_val = jq_rs::run();
+                }
+            }
+
             println!("{}", action.id);
         }
         Ok(())

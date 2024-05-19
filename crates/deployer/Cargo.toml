@@ -8,4 +8,5 @@ alloy.workspace = true
 anyhow.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+jq-rs.workspace = true
 
