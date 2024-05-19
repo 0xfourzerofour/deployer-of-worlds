@@ -5,7 +5,7 @@
 			"action_data": {
 				"type": "deploy",
 				"content": {
-					"address": "0x854914de8b451F82eECCD08E431177e20Eb2EdC9",
+					"address": "0x854914dA8b451F82eE2CD08E43116Ae20Eb2EdC9",
 					"salt": 1,
 					"bytecode": "0x0000000000000000000000000000000000000000000000000000000000000001",
 					"abi":   {
@@ -30,7 +30,7 @@
 			"action_data": {
 				"type": "write",
 				"content": {
-					"address": "0x854914de8b451F82eECCD08E431177e20Eb2EdC9",
+					"address": "inputs.deploy_contract",
 					"abi":   {
 				    "type": "constructor",
 				    "payable": false,
@@ -42,9 +42,6 @@
 					"args": ["0x0", "0x0"],
 					"value": 0
 				}
-			},
-			"output_schema": {
-				"output_type": "string"
 			}
 		}
 ]
