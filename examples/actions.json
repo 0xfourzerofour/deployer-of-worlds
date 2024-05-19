@@ -26,7 +26,6 @@
 		{
 			"id": "stake_contract",
 			"depends_on": ["deploy_contract"],
-			"inputs": ["deploy_contract"],
 			"action_data": {
 				"type": "write",
 				"content": {

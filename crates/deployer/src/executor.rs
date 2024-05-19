@@ -1,5 +1,5 @@
 use anyhow::Result;
-use jq_rs::run;
+use jq_rs;
 use std::{collections::HashMap, sync::Arc};
 
 use alloy::providers::Provider;
@@ -23,12 +23,18 @@ where
         }
     }
 
-    pub async fn execute_actions(&self) -> Result<()> {
-        let mut output_data = HashMap::new();
+    pub async fn execute_actions(&self) -> anyhow::Result<()> {
+        let mut _output_data: HashMap<String, String> = HashMap::new();
         for action in &self.actions {
-            if let Some(inputs) = action.inputs {
+            if let Some(inputs) = &action.inputs {
                 for input in inputs {
-                    let input_val = jq_rs::run();
+                    let (prefix, jq_query) = input.split_once(".").expect("Invalid jq format");
+
+                    let output = output_data
+                        .get(prefix)
+                        .expect("Cound not find output data based on prefix");
+
+                    let input_val = jq_rs::run(jq_query, output).unwrap();
                 }
             }
 
