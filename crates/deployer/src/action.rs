@@ -22,7 +22,7 @@ pub struct DeploymentData {
     pub address: Address,
     pub constructor_args: Vec<String>,
     pub salt: U256,
-    pub abi: AbiItem<'static>,
+    pub abi: JsonAbi,
     pub bytecode: Bytes,
 }
 
