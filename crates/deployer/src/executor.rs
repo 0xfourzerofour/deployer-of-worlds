@@ -1,4 +1,4 @@
-use crate::action::{DeploymentData, ReadData, WriteData};
+use crate::action::{DeploymentData, ReadData, WriteData, ActionData};
 use anyhow::Result;
 use jq_rs;
 use std::{collections::HashMap, sync::Arc};
@@ -36,6 +36,14 @@ where
                         .expect("Cound not find output data based on prefix");
 
                     let input_val = jq_rs::run(jq_query, output).unwrap();
+
+                }
+
+                // TODO pass inputs into each function based on deliminator keys
+                let res = match action.action_data {
+                    ActionData::Deploy(deploy_data) => self.deploy(deploy_data).await?,
+                    ActionData::Write(write_data) => self.write(write_data).await?,
+                    ActionData::Read(read_data) => self.read(read_data).await?,
                 }
             }
 
