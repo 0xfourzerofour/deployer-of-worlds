@@ -1,14 +1,23 @@
 [
 		{
-			"id": "hello",
-			"depends_on": [],
+			"id": "deploy_contract",
 			"type": "deploy",
-			"data": {
-				"address": "0xexpected_address",
-				"salt": "0x..",
-				"bytecode": "0x..",
-				"abi": "0x..",
-				"constructor_args": ["0x...", "0xd..."]
+			"action_data": {
+				"type": "deploy",
+				"content": {
+					"address": "0x854914de8b451F82eECCD08E431177e20Eb2EdC9",
+					"salt": "0x0000000000000000000000000000000000000000000000000000000000000001",
+					"bytecode": "0x0000000000000000000000000000000000000000000000000000000000000001",
+					"abi":   {
+				    "type": "constructor",
+				    "payable": false,
+				    "inputs": [
+				      { "type": "string", "name": "symbol" },
+				      { "type": "string", "name": "name" }
+				    ]
+				  },
+					"constructor_args": ["0x0", "0x0"]
+				}
 			},
 			"output_schema": {
 				"output_type": "string"

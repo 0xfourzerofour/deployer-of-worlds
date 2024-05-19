@@ -30,45 +30,46 @@ where
     }
 
     pub fn register_actions(&mut self, actions: Vec<Action>) -> Result<()> {
-        let action_ids: HashMap<String, usize> = actions
-            .iter()
-            .enumerate()
-            .map(|(i, a)| (a.id.clone(), i))
-            .collect();
+        // let action_ids: HashMap<String, usize> = actions
+        //     .iter()
+        //     .enumerate()
+        //     .map(|(i, a)| (a.id.clone(), i))
+        //     .collect();
 
-        let mut graph = HashMap::new();
+        // let mut graph = HashMap::new();
 
-        for action in &actions {
-            let depends_on_ids: Vec<usize> = action
-                .depends_on
-                .iter()
-                .map(|i| *action_ids.get(i).expect("should be here"))
-                .collect();
+        // for action in &actions {
+        //     let depends_on_ids: Vec<usize> = action
+        //         .depends_on
+        //         .unwrap_or(vec![])
+        //         .iter()
+        //         .map(|i| *action_ids.get(i).expect("should be here"))
+        //         .collect();
 
-            graph.insert(
-                *action_ids.get(&action.id).expect("should be here"),
-                depends_on_ids,
-            );
-        }
+        //     graph.insert(
+        //         *action_ids.get(&action.id).expect("should be here"),
+        //         depends_on_ids,
+        //     );
+        // }
 
-        // Perform topological sorting to find the execution order
-        let order = topological_sort(&graph)?;
+        // // Perform topological sorting to find the execution order
+        // let order = topological_sort(&graph)?;
 
-        // Validate for circular dependencies
-        if order.len() != actions.len() {
-            anyhow::bail!("Circular dependency found");
-        }
+        // // Validate for circular dependencies
+        // if order.len() != actions.len() {
+        //     anyhow::bail!("Circular dependency found");
+        // }
 
-        let mut ordered_list = vec![];
+        // let mut ordered_list = vec![];
 
-        for id in order {
-            let action = actions
-                .get(id)
-                .expect("Action should be present after topological sort");
-            ordered_list.push((*action).clone());
-        }
+        // for id in order {
+        //     let action = actions
+        //         .get(id)
+        //         .expect("Action should be present after topological sort");
+        //     ordered_list.push((*action).clone());
+        // }
 
-        self.actions = ordered_list;
+        // self.actions = ordered_list;
         Ok(())
     }
 }

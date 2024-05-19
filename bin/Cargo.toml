@@ -11,4 +11,5 @@ deployer = { path = "../crates/deployer" }
 tokio.workspace = true
 alloy.workspace = true
 url = "2.5.0"
+dotenv.workspace = true
 

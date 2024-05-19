@@ -1,16 +1,17 @@
 use std::{collections::HashMap, fs};
 
 use alloy::{
-    json_abi::JsonAbi,
+    json_abi::{AbiItem, JsonAbi},
     primitives::{Address, Bytes, B256},
 };
 use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
-pub enum ActionType {
-    Deployment,
-    Write,
-    Read,
+#[serde(tag = "type", content = "content", rename_all = "snake_case")]
+pub enum ActionData {
+    Deploy(DeploymentData),
+    Write(WriteData),
+    Read(ReadData),
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -18,7 +19,7 @@ pub struct DeploymentData {
     address: Address,
     constructor_args: Vec<String>,
     salt: B256,
-    abi: JsonAbi,
+    abi: AbiItem<'static>,
     bytecode: Bytes,
 }
 
@@ -58,16 +59,15 @@ pub struct ReadData {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Action {
-    pub action_type: ActionType,
-    pub depends_on: Vec<String>,
+    pub depends_on: Option<Vec<String>>,
     pub id: String,
-    pub name: String,
-    pub data: HashMap<String, String>,
-    pub inputs: Vec<String>,
-    pub outputs_schema: OutputSchema,
+    pub action_data: ActionData,
+    pub inputs: Option<Vec<String>>,
+    pub output_schema: Option<OutputSchema>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum OutputSchemaType {
     String,
     Object,
