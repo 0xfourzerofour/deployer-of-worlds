@@ -1,8 +1,9 @@
+use crate::action::{DeploymentData, ReadData, WriteData};
 use anyhow::Result;
 use jq_rs;
 use std::{collections::HashMap, sync::Arc};
 
-use alloy::providers::Provider;
+use alloy::{primitives::address, primitives::Address, providers::Provider};
 
 use crate::action::Action;
 
@@ -40,6 +41,18 @@ where
 
             println!("{}", action.id);
         }
+        Ok(())
+    }
+
+    async fn read(&self, _data: ReadData) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    async fn write(&self, _data: WriteData) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    async fn deploy(&self, data: DeploymentData) -> anyhow::Result<()> {
         Ok(())
     }
 

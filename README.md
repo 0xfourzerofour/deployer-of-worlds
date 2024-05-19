@@ -59,6 +59,7 @@ A config driven smart contract deployment and execution framework for repeatable
 ## TODO
 
 - Input validation based on id's and output schema based on jq queries 
+- Generate init code based on input abi and constructor args
 - Conditional Execution logic based on on-chain read funcitonality
 - CREATE2 Deployer implementation for contract deployment
 - CLI tool to allow for arbitrary json inputs to be executed

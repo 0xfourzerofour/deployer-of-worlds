@@ -19,11 +19,11 @@ pub enum ActionData {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct DeploymentData {
-    address: Address,
-    constructor_args: Vec<String>,
-    salt: U256,
-    abi: AbiItem<'static>,
-    bytecode: Bytes,
+    pub address: Address,
+    pub constructor_args: Vec<String>,
+    pub salt: U256,
+    pub abi: AbiItem<'static>,
+    pub bytecode: Bytes,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -65,7 +65,6 @@ pub struct Action {
     pub depends_on: Option<Vec<String>>,
     pub id: String,
     pub action_data: ActionData,
-    pub inputs: Option<Vec<String>>,
     pub output_schema: Option<OutputSchema>,
 }
 
