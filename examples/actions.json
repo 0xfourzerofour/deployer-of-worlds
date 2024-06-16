@@ -6,21 +6,23 @@
 				"type": "deploy",
 				"content": {
 					"address": "0x854914dA8b451F82eE2CD08E43116Ae20Eb2EdC9",
-					"salt": 1,
+					"salt": "1",
 					"bytecode": "0x0000000000000000000000000000000000000000000000000000000000000001",
-					"abi":   {
-				    "type": "constructor",
-				    "payable": false,
-				    "inputs": [
-				      { "type": "string", "name": "symbol" },
-				      { "type": "string", "name": "name" }
-				    ]
-				  },
+					"abi":   [
+						{
+					    "type": "constructor",
+					    "payable": false,
+					    "inputs": [
+					      { "type": "string", "name": "symbol" },
+					      { "type": "string", "name": "name" }
+					    ]
+					  }
+					],
 					"constructor_args": ["0x0", "0x0"]
 				}
 			},
 			"output_schema": {
-				"output_type": "string"
+				"output_type": "address"
 			}
 		},
 		{
@@ -30,14 +32,16 @@
 				"type": "write",
 				"content": {
 					"address": "${deploy_contract}",
-					"abi":   {
-				    "type": "constructor",
-				    "payable": false,
-				    "inputs": [
-				      { "type": "string", "name": "symbol" },
-				      { "type": "string", "name": "name" }
-				    ]
-				  },
+					"abi":   [
+						{
+					    "type": "constructor",
+					    "payable": false,
+					    "inputs": [
+					      { "type": "string", "name": "symbol" },
+					      { "type": "string", "name": "name" }
+					    ]
+					  }
+					],
 					"args": ["0x0", "0x0"],
 					"value": 0
 				}

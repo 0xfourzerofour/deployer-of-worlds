@@ -1,6 +1,5 @@
-use crate::action::{DeploymentData, ReadData, WriteData, ActionData};
+use crate::action::{ActionData, DeploymentData, ReadData, WriteData};
 use anyhow::Result;
-use jq_rs;
 use std::{collections::HashMap, sync::Arc};
 
 use alloy::{primitives::address, primitives::Address, providers::Provider};
@@ -11,6 +10,7 @@ use crate::action::Action;
 pub struct Executor<P> {
     provider: Arc<P>,
     actions: Vec<Action>,
+    inputs: HashMap<String, Vec<(String, String)>>,
 }
 
 impl<P> Executor<P>
@@ -21,46 +21,45 @@ where
         Self {
             provider: Arc::new(provider),
             actions: vec![],
+            inputs: HashMap::new(),
         }
     }
 
-    pub async fn execute_actions(&self) -> anyhow::Result<()> {
-        let mut _output_data: HashMap<String, String> = HashMap::new();
+    pub async fn execute_actions(&mut self) -> anyhow::Result<()> {
+        let mut output_data: HashMap<String, (String, String)> = HashMap::new();
         for action in &self.actions {
-            if let Some(inputs) = &action.inputs {
-                for input in inputs {
-                    let (prefix, jq_query) = input.split_once(".").expect("Invalid jq format");
-
-                    let output = output_data
-                        .get(prefix)
-                        .expect("Cound not find output data based on prefix");
-
-                    let input_val = jq_rs::run(jq_query, output).unwrap();
-
+            match &action.action_data {
+                ActionData::Deploy(deploy_data) => {
+                    self.deploy(deploy_data, &mut output_data).await?
                 }
-
-                // TODO pass inputs into each function based on deliminator keys
-                let res = match action.action_data {
-                    ActionData::Deploy(deploy_data) => self.deploy(deploy_data).await?,
-                    ActionData::Write(write_data) => self.write(write_data).await?,
-                    ActionData::Read(read_data) => self.read(read_data).await?,
-                }
+                ActionData::Write(write_data) => self.write(write_data, &mut output_data).await?,
+                ActionData::Read(read_data) => self.read(read_data, &mut output_data).await?,
             }
-
-            println!("{}", action.id);
         }
         Ok(())
     }
 
-    async fn read(&self, _data: ReadData) -> anyhow::Result<()> {
+    async fn read(
+        &self,
+        _data: &ReadData,
+        output_data: &mut HashMap<String, (String, String)>,
+    ) -> anyhow::Result<()> {
         Ok(())
     }
 
-    async fn write(&self, _data: WriteData) -> anyhow::Result<()> {
+    async fn write(
+        &self,
+        _data: &WriteData,
+        output_data: &mut HashMap<String, (String, String)>,
+    ) -> anyhow::Result<()> {
         Ok(())
     }
 
-    async fn deploy(&self, data: DeploymentData) -> anyhow::Result<()> {
+    async fn deploy(
+        &self,
+        data: &DeploymentData,
+        output_data: &mut HashMap<String, (String, String)>,
+    ) -> anyhow::Result<()> {
         // add logic to gather abi/initcode/constructor_args to generate initcode
         // use this to recompute the create2 address and make sure it matches the expected address
         Ok(())

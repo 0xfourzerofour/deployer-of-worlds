@@ -1,69 +1,22 @@
-use std::{
-    collections::{HashMap, HashSet, VecDeque},
-    fs,
-};
+use std::collections::HashMap;
 
-use alloy::{
-    json_abi::{AbiItem, JsonAbi},
-    primitives::{Address, Bytes, U256},
-};
-use serde::Deserialize;
-
-#[derive(Debug, Clone, Deserialize)]
-#[serde(tag = "type", content = "content", rename_all = "snake_case")]
-pub enum ActionData {
-    Deploy(DeploymentData),
-    Write(WriteData),
-    Read(ReadData),
+pub struct OutputCollector {
+    output_data: HashMap<String, (String, String)>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
-pub struct DeploymentData {
-    address: String,
-    constructor_args: Vec<String>,
-    salt: U256,
-    abi: AbiItem<'static>,
-    bytecode: Bytes,
+pub enum OutputDataType {
+    Bytes,
+    U256,
+    U32,
+    Address,
 }
 
-#[derive(Debug, Clone, Deserialize)]
-pub struct WriteData {
-    address: String,
-    abi: AbiItem<'static>,
-    args: Vec<String>,
-    value: U256,
-}
+impl OutputCollector {
+    pub fn new() -> Self {
+        Self {
+            output_data: HashMap::new(),
+        }
+    }
 
-#[derive(Debug, Clone, Deserialize)]
-pub struct ReadData {
-    address: String,
-    constructor_args: Vec<String>,
-    salt: U256,
-    abi: JsonAbi,
-    bytecode: Bytes,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct Action {
-    pub depends_on: Option<Vec<String>>,
-    pub id: String,
-    pub action_data: ActionData,
-    pub inputs: Option<Vec<String>>,
-    pub output_schema: Option<OutputSchema>,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum OutputSchemaType {
-    String,
-    Object,
-    Bool,
-    Int,
-    Float,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct OutputSchema {
-    pub output_type: OutputSchemaType,
-    pub properties: Option<HashMap<String, OutputSchema>>,
+    pub fn save_output_data(&mut self, output: String) {}
 }

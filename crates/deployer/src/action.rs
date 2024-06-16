@@ -4,7 +4,7 @@ use std::{
 };
 
 use alloy::{
-    json_abi::{AbiItem, JsonAbi},
+    json_abi::JsonAbi,
     primitives::{Address, Bytes, U256},
 };
 use serde::Deserialize;
@@ -19,17 +19,17 @@ pub enum ActionData {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct DeploymentData {
-    pub address: Address,
+    pub address: String,
     pub constructor_args: Vec<String>,
-    pub salt: U256,
+    pub salt: String,
     pub abi: JsonAbi,
-    pub bytecode: Bytes,
+    pub bytecode: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct WriteData {
-    address: Address,
-    abi: AbiItem<'static>,
+    address: String,
+    abi: JsonAbi,
     args: Vec<String>,
     value: U256,
     condition: Option<WriteCondition>,
@@ -71,11 +71,22 @@ pub struct Action {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum OutputSchemaType {
-    String,
-    Object,
+    Address,
     Bool,
-    Int,
-    Float,
+    Bytes,
+    String,
+    UInt8,
+    UInt16,
+    UInt32,
+    UInt64,
+    UInt128,
+    UInt256,
+    Int8,
+    Int16,
+    Int32,
+    Int64,
+    Int128,
+    Int256,
 }
 
 #[derive(Debug, Clone, Deserialize)]
