@@ -4,53 +4,96 @@ A config driven smart contract deployment and execution framework for repeatable
 
 ## Example Config
 
-```
+```json
 [
-	{
-		"id": "deploy_contract",
-		"depends_on": [],
-		"action_data": {
-			"type": "deploy",
-			"content": {
-				"address": "0x854914dA8b451F82eE2CD08E43116Ae20Eb2EdC9",
-				"salt": 1,
-				"bytecode": "0x0000000000000000000000000000000000000000000000000000000000000001",
-				"abi":   {
-			    "type": "constructor",
-			    "payable": false,
-			    "inputs": [
-			      { "type": "string", "name": "symbol" },
-			      { "type": "string", "name": "name" }
-			    ]
-			  },
-				"constructor_args": ["0x0", "0x0"]
-			}
-		},
-		"output_schema": {
-			"output_type": "string"
-		}
-	},
-	{
-		"id": "stake_contract",
-		"depends_on": ["deploy_contract"],
-		"inputs": ["deploy_contract"],
-		"action_data": {
-			"type": "write",
-			"content": {
-				"address": "${deploy_contract}",
-				"abi":   {
-			    "type": "constructor",
-			    "payable": false,
-			    "inputs": [
-			      { "type": "string", "name": "symbol" },
-			      { "type": "string", "name": "name" }
-			    ]
-			  },
-				"args": ["0x0", "0x0"],
-				"value": 0
-			}
-		}
-	}
+  {
+    "id": "read_entrypoint_deposit_info",
+    "action_data": {
+      "type": "read",
+      "content": {
+        "address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+        "function": {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "getDepositInfo",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "uint112",
+                  "name": "deposit",
+                  "type": "uint112"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "staked",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint112",
+                  "name": "stake",
+                  "type": "uint112"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "unstakeDelaySec",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint48",
+                  "name": "withdrawTime",
+                  "type": "uint48"
+                }
+              ],
+              "internalType": "struct IStakeManager.DepositInfo",
+              "name": "info",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        "args": [
+          "0x4f84a207A80c39E9e8BaE717c1F25bA7AD1fB08F"
+        ]
+      }
+    }
+  },
+  {
+    "id": "read_entrypoint_get_balance",
+    "depends_on": ["read_entrypoint_deposit_info"],
+    "action_data": {
+      "type": "read",
+      "content": {
+        "address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+        "function": {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        "args": [
+          "0x4f84a207A80c39E9e8BaE717c1F25bA7AD1fB08F"
+        ]
+      }
+    }
+  }
 ]
 
 ```
