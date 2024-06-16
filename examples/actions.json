@@ -8,21 +8,15 @@
 					"address": "0x854914dA8b451F82eE2CD08E43116Ae20Eb2EdC9",
 					"salt": "1",
 					"bytecode": "0x0000000000000000000000000000000000000000000000000000000000000001",
-					"abi":   [
-						{
-					    "type": "constructor",
+					"contructor": {
 					    "payable": false,
 					    "inputs": [
 					      { "type": "string", "name": "symbol" },
 					      { "type": "string", "name": "name" }
-					    ]
-					  }
-					],
-					"constructor_args": ["0x0", "0x0"]
+					  ]
+					},
+					"args": ["0x0", "0x0"]
 				}
-			},
-			"output_schema": {
-				"output_type": "address"
 			}
 		},
 		{
@@ -31,17 +25,16 @@
 			"action_data": {
 				"type": "write",
 				"content": {
-					"address": "${deploy_contract}",
-					"abi":   [
-						{
-					    "type": "constructor",
-					    "payable": false,
-					    "inputs": [
-					      { "type": "string", "name": "symbol" },
-					      { "type": "string", "name": "name" }
-					    ]
-					  }
-					],
+					"address": "0x854914dA8b451F82eE2CD08E43116Ae20Eb2EdC9",
+					"function": {
+						"inputs":[
+							{"internalType":"uint32","name":"unstakeDelaySec","type":"uint32"}
+						],
+						"name":"addStake",
+						"outputs":[],
+						"stateMutability":"payable",
+						"type":"function"
+					},
 					"args": ["0x0", "0x0"],
 					"value": 0
 				}

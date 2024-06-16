@@ -4,10 +4,11 @@ use std::{
 };
 
 use alloy::{
-    json_abi::JsonAbi,
+    json_abi::{Constructor, Function},
     primitives::{Address, Bytes, U256},
 };
 use serde::Deserialize;
+use serde_json::Value;
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(tag = "type", content = "content", rename_all = "snake_case")]
@@ -20,19 +21,19 @@ pub enum ActionData {
 #[derive(Debug, Clone, Deserialize)]
 pub struct DeploymentData {
     pub address: String,
-    pub constructor_args: Vec<String>,
+    pub constructor_args: Vec<Bytes>,
     pub salt: String,
-    pub abi: JsonAbi,
+    pub constructor_abi_item: Constructor,
     pub bytecode: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct WriteData {
-    address: String,
-    abi: JsonAbi,
-    args: Vec<String>,
-    value: U256,
-    condition: Option<WriteCondition>,
+    pub address: String,
+    pub function: Function,
+    pub args: Vec<Bytes>,
+    pub value: U256,
+    pub condition: Option<WriteCondition>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -53,11 +54,9 @@ enum CpmOption {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct ReadData {
-    address: Address,
-    constructor_args: Vec<String>,
-    salt: U256,
-    abi: JsonAbi,
-    bytecode: Bytes,
+    pub address: String,
+    pub args: Vec<String>,
+    pub function: Function,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -65,7 +64,6 @@ pub struct Action {
     pub depends_on: Option<Vec<String>>,
     pub id: String,
     pub action_data: ActionData,
-    pub output_schema: Option<OutputSchema>,
 }
 
 #[derive(Debug, Clone, Deserialize)]

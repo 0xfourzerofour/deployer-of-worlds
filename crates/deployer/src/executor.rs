@@ -2,12 +2,18 @@ use crate::{
     action::{ActionData, DeploymentData, ReadData, WriteData},
     parser::OutputCollector,
 };
-use std::{collections::HashMap, sync::Arc};
+use alloy::hex::decode_to_slice;
+use std::sync::Arc;
 
 use alloy::{
-    primitives::Address,
+    contract::CallBuilder,
+    dyn_abi::{DynSolType, FunctionExt, JsonAbiExt},
+    primitives::{Address, Bytes},
     providers::{network::TransactionBuilder, Provider},
-    rpc::types::eth::{TransactionInput, TransactionRequest},
+    rpc::types::eth::{
+        serde_helpers::serialize_hex_string_no_prefix, TransactionInput, TransactionRequest,
+    },
+    sol_types::{abi::encode_params, SolCall, SolValue},
 };
 
 use crate::action::Action;
@@ -45,36 +51,70 @@ where
 
     async fn read(
         &self,
-        _data: &ReadData,
-        output_data: &mut OutputCollector,
+        data: &ReadData,
+        _output_data: &mut OutputCollector,
     ) -> anyhow::Result<()> {
+        let to: Address = data.address.parse()?;
+        let mut dyn_args = vec![];
+        for (i, arg) in data.args.iter().enumerate() {
+            let sol_type = DynSolType::parse(&data.function.inputs[i].ty)?;
+            println!("{:?}", sol_type);
+            println!("{:?}", arg);
+
+            let val = sol_type.abi_decode(arg.as_bytes())?;
+            dyn_args.push(val);
+        }
+        println!("{:?}", dyn_args);
+
+        let input = data.function.abi_encode_input(&dyn_args)?;
+        println!("{:?}", input);
+
+        let tx_req = CallBuilder::new_raw(self.provider.clone(), Bytes::from(input))
+            .to(to)
+            .call_raw()
+            .await?;
+
+        println!("{:?}", tx_req);
+
         Ok(())
     }
 
     async fn write(
         &self,
-        _data: &WriteData,
-        output_data: &mut OutputCollector,
+        data: &WriteData,
+        _output_data: &mut OutputCollector,
     ) -> anyhow::Result<()> {
+        // todo get address from variable if available
+        let to: Address = data.address.parse()?;
+
+        let mut dyn_args = vec![];
+
+        for (i, arg) in data.args.iter().enumerate() {
+            let sol_type = DynSolType::parse(&data.function.inputs[i].ty)?;
+            let val = sol_type.abi_decode(arg)?;
+            dyn_args.push(val);
+        }
+
+        let input = data.function.abi_encode_input(&dyn_args)?;
+
+        let tx_req = CallBuilder::new_raw(self.provider.clone(), Bytes::from(input))
+            .to(to)
+            .value(data.value)
+            .call_raw()
+            .with_decoder(&data.function)
+            .await?;
+
+        println!("{:?}", tx_req[0]);
+
         Ok(())
     }
 
     async fn deploy(
         &self,
-        data: &DeploymentData,
-        output_data: &mut OutputCollector,
+        _data: &DeploymentData,
+        _output_data: &mut OutputCollector,
     ) -> anyhow::Result<()> {
-        let address = output_data.get_input_value(data.address.clone())?;
-        let tx_input = TransactionInput::new(data.constructor_args);
-
-        // TODO fixure out how to use create2 instead of TX::Create
-        let tx_req = TransactionRequest::default()
-            .to(Address::ZERO)
-            .set_deploy_code(data.bytecode);
-
-        self.provider.call().await?;
-
-        self.provider.send_transaction().await?;
+        // let address = output_data.get_input_value(data.address.clone())?;
         Ok(())
     }
 
