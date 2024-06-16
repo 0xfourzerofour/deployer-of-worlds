@@ -9,6 +9,7 @@ use alloy::{
     dyn_abi::{DynSolType, JsonAbiExt},
     primitives::{Address, Bytes},
     providers::Provider,
+    rpc::types::eth::{TransactionInput, TransactionRequest},
 };
 
 use crate::action::Action;
@@ -59,7 +60,6 @@ where
         }
 
         let input = data.function.abi_encode_input(&dyn_args)?;
-
         let tx_req = CallBuilder::new_raw(self.provider.clone(), Bytes::from(input))
             .to(to)
             .call_raw()
@@ -73,9 +73,23 @@ where
 
     async fn write(
         &self,
-        _data: &WriteData,
+        data: &WriteData,
         _output_data: &mut OutputCollector,
     ) -> anyhow::Result<()> {
+        let to: Address = data.address.parse()?;
+        let mut dyn_args = vec![];
+
+        for (i, arg) in data.args.iter().enumerate() {
+            let sol_type = DynSolType::parse(&data.function.inputs[i].ty)?;
+            let val = sol_type.coerce_str(arg)?;
+            dyn_args.push(val);
+        }
+
+        let input = data.function.abi_encode_input(&dyn_args)?;
+        let tx_input = TransactionInput::new(Bytes::from(input));
+        let tx = TransactionRequest::default().to(to).input(tx_input);
+        let pending = self.provider.send_transaction(tx).await?;
+        pending.get_receipt().await?;
         Ok(())
     }
 

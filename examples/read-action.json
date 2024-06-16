@@ -57,7 +57,8 @@
     }
   },
   {
-    "id": "read_entrypoint_balance",
+    "id": "read_entrypoint_get_balance",
+    "depends_on": ["read_entrypoint_deposit_info"],
     "action_data": {
       "type": "read",
       "content": {
