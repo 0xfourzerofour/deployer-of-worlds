@@ -5,10 +5,9 @@ use std::{
 
 use alloy::{
     json_abi::{Constructor, Function},
-    primitives::{Address, Bytes, U256},
+    primitives::{Bytes, U256},
 };
 use serde::Deserialize;
-use serde_json::Value;
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(tag = "type", content = "content", rename_all = "snake_case")]
@@ -21,7 +20,7 @@ pub enum ActionData {
 #[derive(Debug, Clone, Deserialize)]
 pub struct DeploymentData {
     pub address: String,
-    pub constructor_args: Vec<Bytes>,
+    pub constructor_args: Vec<String>,
     pub salt: String,
     pub constructor_abi_item: Constructor,
     pub bytecode: String,
@@ -31,7 +30,7 @@ pub struct DeploymentData {
 pub struct WriteData {
     pub address: String,
     pub function: Function,
-    pub args: Vec<Bytes>,
+    pub args: Vec<String>,
     pub value: U256,
     pub condition: Option<WriteCondition>,
 }

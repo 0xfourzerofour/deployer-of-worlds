@@ -2,18 +2,13 @@ use crate::{
     action::{ActionData, DeploymentData, ReadData, WriteData},
     parser::OutputCollector,
 };
-use alloy::hex::decode_to_slice;
 use std::sync::Arc;
 
 use alloy::{
     contract::CallBuilder,
-    dyn_abi::{DynSolType, FunctionExt, JsonAbiExt},
+    dyn_abi::{DynSolType, JsonAbiExt},
     primitives::{Address, Bytes},
-    providers::{network::TransactionBuilder, Provider},
-    rpc::types::eth::{
-        serde_helpers::serialize_hex_string_no_prefix, TransactionInput, TransactionRequest,
-    },
-    sol_types::{abi::encode_params, SolCall, SolValue},
+    providers::Provider,
 };
 
 use crate::action::Action;
@@ -56,22 +51,19 @@ where
     ) -> anyhow::Result<()> {
         let to: Address = data.address.parse()?;
         let mut dyn_args = vec![];
+
         for (i, arg) in data.args.iter().enumerate() {
             let sol_type = DynSolType::parse(&data.function.inputs[i].ty)?;
-            println!("{:?}", sol_type);
-            println!("{:?}", arg);
-
-            let val = sol_type.abi_decode(arg.as_bytes())?;
+            let val = sol_type.coerce_str(arg)?;
             dyn_args.push(val);
         }
-        println!("{:?}", dyn_args);
 
         let input = data.function.abi_encode_input(&dyn_args)?;
-        println!("{:?}", input);
 
         let tx_req = CallBuilder::new_raw(self.provider.clone(), Bytes::from(input))
             .to(to)
             .call_raw()
+            .with_decoder(&data.function)
             .await?;
 
         println!("{:?}", tx_req);
@@ -81,31 +73,9 @@ where
 
     async fn write(
         &self,
-        data: &WriteData,
+        _data: &WriteData,
         _output_data: &mut OutputCollector,
     ) -> anyhow::Result<()> {
-        // todo get address from variable if available
-        let to: Address = data.address.parse()?;
-
-        let mut dyn_args = vec![];
-
-        for (i, arg) in data.args.iter().enumerate() {
-            let sol_type = DynSolType::parse(&data.function.inputs[i].ty)?;
-            let val = sol_type.abi_decode(arg)?;
-            dyn_args.push(val);
-        }
-
-        let input = data.function.abi_encode_input(&dyn_args)?;
-
-        let tx_req = CallBuilder::new_raw(self.provider.clone(), Bytes::from(input))
-            .to(to)
-            .value(data.value)
-            .call_raw()
-            .with_decoder(&data.function)
-            .await?;
-
-        println!("{:?}", tx_req[0]);
-
         Ok(())
     }
 

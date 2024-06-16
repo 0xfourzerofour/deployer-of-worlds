@@ -1,60 +1,89 @@
 [
-    {
-        "id": "read_entrypoint",
-        "action_data": {
-            "type": "read",
-            "content": {
-                "address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-                "function": {
-                    "inputs": [
-                        {
-                            "internalType": "address",
-                            "name": "account",
-                            "type": "address"
-                        }
-                    ],
-                    "name": "getDepositInfo",
-                    "outputs": [
-                        {
-                            "components": [
-                                {
-                                    "internalType": "uint112",
-                                    "name": "deposit",
-                                    "type": "uint112"
-                                },
-                                {
-                                    "internalType": "bool",
-                                    "name": "staked",
-                                    "type": "bool"
-                                },
-                                {
-                                    "internalType": "uint112",
-                                    "name": "stake",
-                                    "type": "uint112"
-                                },
-                                {
-                                    "internalType": "uint32",
-                                    "name": "unstakeDelaySec",
-                                    "type": "uint32"
-                                },
-                                {
-                                    "internalType": "uint48",
-                                    "name": "withdrawTime",
-                                    "type": "uint48"
-                                }
-                            ],
-                            "internalType": "struct IStakeManager.DepositInfo",
-                            "name": "info",
-                            "type": "tuple"
-                        }
-                    ],
-                    "stateMutability": "view"
-                },
-                "args": [
-                    "0x4Fd9098af9ddcB41DA48A1d78F91F1398965addc"
-                ],
-                "value": 0
+  {
+    "id": "read_entrypoint_deposit_info",
+    "action_data": {
+      "type": "read",
+      "content": {
+        "address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+        "function": {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
             }
-        }
+          ],
+          "name": "getDepositInfo",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "uint112",
+                  "name": "deposit",
+                  "type": "uint112"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "staked",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint112",
+                  "name": "stake",
+                  "type": "uint112"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "unstakeDelaySec",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint48",
+                  "name": "withdrawTime",
+                  "type": "uint48"
+                }
+              ],
+              "internalType": "struct IStakeManager.DepositInfo",
+              "name": "info",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        "args": [
+          "0x4f84a207A80c39E9e8BaE717c1F25bA7AD1fB08F"
+        ]
+      }
     }
+  },
+  {
+    "id": "read_entrypoint_balance",
+    "action_data": {
+      "type": "read",
+      "content": {
+        "address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+        "function": {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        "args": [
+          "0x4f84a207A80c39E9e8BaE717c1F25bA7AD1fB08F"
+        ]
+      }
+    }
+  }
 ]
