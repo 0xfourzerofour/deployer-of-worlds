@@ -26,7 +26,6 @@ where
         Self {
             provider: Arc::new(provider),
             actions: vec![],
-            inputs: HashMap::new(),
         }
     }
 
@@ -72,6 +71,8 @@ where
         let tx_req = TransactionRequest::default()
             .to(Address::ZERO)
             .set_deploy_code(data.bytecode);
+
+        self.provider.call().await?;
 
         self.provider.send_transaction().await?;
         Ok(())
