@@ -63,3 +63,4 @@ A config driven smart contract deployment and execution framework for repeatable
 - Conditional Execution logic based on on-chain read funcitonality
 - CREATE2 Deployer implementation for contract deployment
 - CLI tool to allow for arbitrary json inputs to be executed
+- Use Create2 deployer factory and bind rust types to it (here)[https://github.com/pcaversaccio/createx]

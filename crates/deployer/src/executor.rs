@@ -4,7 +4,11 @@ use crate::{
 };
 use std::{collections::HashMap, sync::Arc};
 
-use alloy::{primitives::Address, providers::Provider, rpc::types::eth::{TransactionRequest, TransactionInput}};
+use alloy::{
+    primitives::Address,
+    providers::{network::TransactionBuilder, Provider},
+    rpc::types::eth::{TransactionInput, TransactionRequest},
+};
 
 use crate::action::Action;
 
@@ -63,7 +67,11 @@ where
     ) -> anyhow::Result<()> {
         let address = output_data.get_input_value(data.address.clone())?;
         let tx_input = TransactionInput::new(data.constructor_args);
-        let tx_req = TransactionRequest::default().to(Address::ZERO).input()
+
+        // TODO fixure out how to use create2 instead of TX::Create
+        let tx_req = TransactionRequest::default()
+            .to(Address::ZERO)
+            .set_deploy_code(data.bytecode);
 
         self.provider.send_transaction().await?;
         Ok(())
