@@ -1,8 +1,10 @@
-use crate::action::{ActionData, DeploymentData, ReadData, WriteData};
-use anyhow::Result;
+use crate::{
+    action::{ActionData, DeploymentData, ReadData, WriteData},
+    parser::OutputCollector,
+};
 use std::{collections::HashMap, sync::Arc};
 
-use alloy::{primitives::address, primitives::Address, providers::Provider};
+use alloy::{primitives::Address, providers::Provider, rpc::types::eth::{TransactionRequest, TransactionInput}};
 
 use crate::action::Action;
 
@@ -10,7 +12,6 @@ use crate::action::Action;
 pub struct Executor<P> {
     provider: Arc<P>,
     actions: Vec<Action>,
-    inputs: HashMap<String, Vec<(String, String)>>,
 }
 
 impl<P> Executor<P>
@@ -26,7 +27,7 @@ where
     }
 
     pub async fn execute_actions(&mut self) -> anyhow::Result<()> {
-        let mut output_data: HashMap<String, (String, String)> = HashMap::new();
+        let mut output_data = OutputCollector::new();
         for action in &self.actions {
             match &action.action_data {
                 ActionData::Deploy(deploy_data) => {
@@ -42,7 +43,7 @@ where
     async fn read(
         &self,
         _data: &ReadData,
-        output_data: &mut HashMap<String, (String, String)>,
+        output_data: &mut OutputCollector,
     ) -> anyhow::Result<()> {
         Ok(())
     }
@@ -50,7 +51,7 @@ where
     async fn write(
         &self,
         _data: &WriteData,
-        output_data: &mut HashMap<String, (String, String)>,
+        output_data: &mut OutputCollector,
     ) -> anyhow::Result<()> {
         Ok(())
     }
@@ -58,10 +59,13 @@ where
     async fn deploy(
         &self,
         data: &DeploymentData,
-        output_data: &mut HashMap<String, (String, String)>,
+        output_data: &mut OutputCollector,
     ) -> anyhow::Result<()> {
-        // add logic to gather abi/initcode/constructor_args to generate initcode
-        // use this to recompute the create2 address and make sure it matches the expected address
+        let address = output_data.get_input_value(data.address.clone())?;
+        let tx_input = TransactionInput::new(data.constructor_args);
+        let tx_req = TransactionRequest::default().to(Address::ZERO).input()
+
+        self.provider.send_transaction().await?;
         Ok(())
     }
 
