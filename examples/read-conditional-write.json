@@ -1,0 +1,50 @@
+[
+  {
+    "id": "read_entrypoint_get_balance",
+    "action_data": {
+      "type": "read",
+      "content": {
+        "address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+        "function": {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        "args": [
+          "0x4f84a207A80c39E9e8BaE717c1F25bA7AD1fB08F"
+        ]
+      }
+    }
+  },
+  {
+    "id": "deposit_paymaster",
+    "depends_on": ["read_entrypoint_get_balance"],
+    "action_data": {
+      "type": "write",
+      "content": {
+        "address": "0x4f84a207A80c39E9e8BaE717c1F25bA7AD1fB08F",
+        "function": {
+          "inputs": [],
+          "name": "deposit",
+          "outputs": [],
+          "stateMutability": "payable"
+        },
+        "value": 10000000000000000,
+        "args": []
+      }
+    }
+  }
+]

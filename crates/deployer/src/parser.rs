@@ -1,27 +1,10 @@
+use alloy::dyn_abi::{DynSolType, DynSolValue};
 use regex::Regex;
 use std::collections::HashMap;
 
+#[derive(Debug)]
 pub struct OutputCollector {
-    output_data: HashMap<String, (OutputDataType, String)>,
-}
-
-pub enum OutputDataType {
-    Address,
-    Bool,
-    Bytes,
-    String,
-    UInt8,
-    UInt16,
-    UInt32,
-    UInt64,
-    UInt128,
-    UInt256,
-    Int8,
-    Int16,
-    Int32,
-    Int64,
-    Int128,
-    Int256,
+    output_data: HashMap<String, DynSolValue>,
 }
 
 impl OutputCollector {
@@ -31,21 +14,28 @@ impl OutputCollector {
         }
     }
 
-    pub fn save_output_data(&mut self, output: String) {}
+    pub fn save_output_data(&mut self, outputs: Vec<DynSolValue>) {
+        for output in outputs {
+            if let Some(t) = output.as_type() {
+                match t {
+                    DynSolType::FixedBytes(size) => todo!(),
+                    DynSolType::Bool => todo!(),
+                    DynSolType::Int(size) => todo!(),
+                    DynSolType::Uint(size) => println!("UINTTTT {:?}", size),
+                    DynSolType::Tuple(types) => println!("TUPPLLLEE {:?}", types),
+                    DynSolType::String => todo!(),
+                    DynSolType::Bytes => todo!(),
+                    DynSolType::Array(array_type) => todo!(),
+                    DynSolType::FixedArray(array_type, size) => todo!(),
+                    DynSolType::Address => todo!(),
+                    DynSolType::Function => todo!(),
+                }
+            }
+        }
+    }
 
     pub fn get_input_value(&self, input_str: String) -> anyhow::Result<String> {
-        let re = Regex::new(r"\$\{(\w+)\}")?;
-
-        if let Some(value) = re.find(&input_str) {
-            let query = value.as_str();
-
-            let (_output_type, str_encoded_val) = self
-                .output_data
-                .get(query)
-                .expect("Data should be available at query index");
-
-            return Ok(str_encoded_val.to_owned());
-        }
+        let _re = Regex::new(r"\$\{(\w+)\}")?;
 
         Ok(input_str)
     }

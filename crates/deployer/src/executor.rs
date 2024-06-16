@@ -17,6 +17,7 @@ use crate::action::Action;
 #[derive(Debug)]
 pub struct Executor<P> {
     provider: Arc<P>,
+    output_data: OutputCollector,
     actions: Vec<Action>,
 }
 
@@ -27,29 +28,23 @@ where
     pub fn new(provider: P) -> Self {
         Self {
             provider: Arc::new(provider),
+            output_data: OutputCollector::new(),
             actions: vec![],
         }
     }
 
     pub async fn execute_actions(&mut self) -> anyhow::Result<()> {
-        let mut output_data = OutputCollector::new();
-        for action in &self.actions {
+        for action in self.actions.clone() {
             match &action.action_data {
-                ActionData::Deploy(deploy_data) => {
-                    self.deploy(deploy_data, &mut output_data).await?
-                }
-                ActionData::Write(write_data) => self.write(write_data, &mut output_data).await?,
-                ActionData::Read(read_data) => self.read(read_data, &mut output_data).await?,
+                ActionData::Deploy(deploy_data) => self.deploy(deploy_data).await?,
+                ActionData::Write(write_data) => self.write(write_data).await?,
+                ActionData::Read(read_data) => self.read(read_data).await?,
             }
         }
         Ok(())
     }
 
-    async fn read(
-        &self,
-        data: &ReadData,
-        _output_data: &mut OutputCollector,
-    ) -> anyhow::Result<()> {
+    async fn read(&mut self, data: &ReadData) -> anyhow::Result<()> {
         let to: Address = data.address.parse()?;
         let mut dyn_args = vec![];
 
@@ -60,44 +55,22 @@ where
         }
 
         let input = data.function.abi_encode_input(&dyn_args)?;
-        let tx_req = CallBuilder::new_raw(self.provider.clone(), Bytes::from(input))
+        let read_output = CallBuilder::new_raw(self.provider.clone(), Bytes::from(input))
             .to(to)
             .call_raw()
             .with_decoder(&data.function)
             .await?;
 
-        println!("{:?}", tx_req);
+        self.output_data.save_output_data(read_output);
 
         Ok(())
     }
 
-    async fn write(
-        &self,
-        data: &WriteData,
-        _output_data: &mut OutputCollector,
-    ) -> anyhow::Result<()> {
-        let to: Address = data.address.parse()?;
-        let mut dyn_args = vec![];
-
-        for (i, arg) in data.args.iter().enumerate() {
-            let sol_type = DynSolType::parse(&data.function.inputs[i].ty)?;
-            let val = sol_type.coerce_str(arg)?;
-            dyn_args.push(val);
-        }
-
-        let input = data.function.abi_encode_input(&dyn_args)?;
-        let tx_input = TransactionInput::new(Bytes::from(input));
-        let tx = TransactionRequest::default().to(to).input(tx_input);
-        let pending = self.provider.send_transaction(tx).await?;
-        pending.get_receipt().await?;
+    async fn write(&self, data: &WriteData) -> anyhow::Result<()> {
         Ok(())
     }
 
-    async fn deploy(
-        &self,
-        _data: &DeploymentData,
-        _output_data: &mut OutputCollector,
-    ) -> anyhow::Result<()> {
+    async fn deploy(&self, _data: &DeploymentData) -> anyhow::Result<()> {
         // let address = output_data.get_input_value(data.address.clone())?;
         Ok(())
     }
