@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 use alloy::{
     contract::CallBuilder,
-    dyn_abi::{DynSolType, JsonAbiExt},
+    dyn_abi::{DynSolType, DynSolValue, JsonAbiExt},
     primitives::{Address, Bytes},
     providers::Provider,
     rpc::types::eth::{TransactionInput, TransactionRequest},
@@ -38,21 +38,28 @@ where
             match &action.action_data {
                 ActionData::Deploy(deploy_data) => self.deploy(deploy_data).await?,
                 ActionData::Write(write_data) => self.write(write_data).await?,
-                ActionData::Read(read_data) => self.read(read_data).await?,
+                ActionData::Read(read_data) => self.read(action.id, read_data).await?,
             }
         }
         Ok(())
     }
 
-    async fn read(&mut self, data: &ReadData) -> anyhow::Result<()> {
+    async fn read(&mut self, id: String, data: &ReadData) -> anyhow::Result<()> {
         let to: Address = data.address.parse()?;
-        let mut dyn_args = vec![];
 
-        for (i, arg) in data.args.iter().enumerate() {
-            let sol_type = DynSolType::parse(&data.function.inputs[i].ty)?;
-            let val = sol_type.coerce_str(arg)?;
-            dyn_args.push(val);
-        }
+        let dyn_args: Vec<DynSolValue> = data
+            .args
+            .iter()
+            .enumerate()
+            .map(|(i, arg)| {
+                let sol_type =
+                    DynSolType::parse(&data.function.inputs[i].ty).expect("Invalid type");
+                let val = sol_type
+                    .coerce_str(arg)
+                    .expect("Could not coerse into dynamic type");
+                val
+            })
+            .collect();
 
         let input = data.function.abi_encode_input(&dyn_args)?;
         let read_output = CallBuilder::new_raw(self.provider.clone(), Bytes::from(input))
@@ -61,7 +68,8 @@ where
             .with_decoder(&data.function)
             .await?;
 
-        self.output_data.save_output_data(read_output);
+        self.output_data
+            .save_output_data(id, data.function.outputs.clone(), read_output);
 
         Ok(())
     }

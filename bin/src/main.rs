@@ -13,7 +13,7 @@ async fn main() -> Result<()> {
     let client = ClientBuilder::default().http(Url::parse(&rpc_url)?);
     let provider = ProviderBuilder::new().on_client(client);
     let mut executor = Executor::new(provider.boxed());
-    let actions = load_actions("./examples/read-conditional-write.json")?;
+    let actions = load_actions("./examples/read-action.json")?;
     executor.register_actions(actions);
     executor.execute_actions().await?;
 

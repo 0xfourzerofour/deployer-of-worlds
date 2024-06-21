@@ -42,16 +42,7 @@
           "outputs": [],
           "stateMutability": "payable"
         },
-        "conditions": [
-          {
-            "id": "balance_condition",
-            "cmp": "lt",
-            "input": "${read_entrypoint_get_balance}",
-            "value": "10000000000000",
-            "resolution": "difference",
-          }
-        ],
-        "value": "${self.conditions}",
+        "value": "0",
         "args": []
       }
     }
