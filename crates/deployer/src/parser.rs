@@ -39,6 +39,8 @@ impl OutputCollector {
     }
 }
 
+// TODO use only one recursive function so that we can parse dynamicly size
+// arrays without needed to do any funky shit
 fn recurse_abi_outputs(
     map: &mut HashMap<String, (DynSolType, DynSolValue)>,
     outputs: Vec<DynSolValue>,
