@@ -9,7 +9,6 @@ use alloy::{
     dyn_abi::{DynSolType, DynSolValue, JsonAbiExt},
     primitives::{Address, Bytes},
     providers::Provider,
-    rpc::types::eth::{TransactionInput, TransactionRequest},
 };
 
 use crate::action::Action;
@@ -54,9 +53,12 @@ where
             .map(|(i, arg)| {
                 let sol_type =
                     DynSolType::parse(&data.function.inputs[i].ty).expect("Invalid type");
-                let val = sol_type
-                    .coerce_str(arg)
-                    .expect("Could not coerse into dynamic type");
+
+                let val = self
+                    .output_data
+                    .get_input_value(arg, sol_type)
+                    .expect("Should be dynamic value or valid static type");
+
                 val
             })
             .collect();
@@ -69,12 +71,12 @@ where
             .await?;
 
         self.output_data
-            .save_output_data(id, data.function.outputs.clone(), read_output);
+            .save_output_data(id, data.function.outputs.clone(), read_output)?;
 
         Ok(())
     }
 
-    async fn write(&self, data: &WriteData) -> anyhow::Result<()> {
+    async fn write(&self, _data: &WriteData) -> anyhow::Result<()> {
         Ok(())
     }
 

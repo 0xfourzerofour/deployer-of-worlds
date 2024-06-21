@@ -2,9 +2,11 @@ use alloy::{
     dyn_abi::{DynSolType, DynSolValue},
     json_abi::Param,
 };
+use anyhow::bail;
 use regex::Regex;
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 
+// TODO make sure this works with dynamically sized arrays
 #[derive(Debug)]
 pub struct OutputCollector {
     output_data: HashMap<String, (DynSolType, DynSolValue)>,
@@ -20,81 +22,113 @@ impl OutputCollector {
     pub fn save_output_data(
         &mut self,
         id: String,
-        output_defintions: Vec<Param>,
+        output_definitions: Vec<Param>,
         outputs: Vec<DynSolValue>,
-    ) {
-        if output_defintions.len() != outputs.len() {
-            panic!("Something is wrong with the inputs and outputs");
+    ) -> anyhow::Result<()> {
+        if output_definitions.len() != outputs.len() {
+            return Err(anyhow::anyhow!("Mismatched input and output lengths"));
         }
 
-        let mut name_queue = VecDeque::new();
-        recurse_abi_definition(id, output_defintions, &mut name_queue);
-        recurse_abi_outputs(&mut self.output_data, outputs, &mut name_queue);
+        let mut name_stack = vec![];
+        self.recurse_abi(id, output_definitions, outputs, &mut name_stack)?;
+        println!("{:?}", self.output_data);
+
+        Ok(())
     }
 
-    pub fn get_input_value(&self, input_str: String) -> anyhow::Result<String> {
-        let _re = Regex::new(r"\$\{(\w+)\}")?;
-
-        Ok(input_str)
+    pub fn get_input_value(
+        &self,
+        input_str: &str,
+        input_type: DynSolType,
+    ) -> anyhow::Result<DynSolValue> {
+        let re = Regex::new(r"\$\{([^\}]+)\}")?;
+        if let Some(captures) = re.captures(&input_str) {
+            let inner_string = captures.get(1).unwrap().as_str();
+            if let Some((_t, v)) = self.output_data.get(inner_string) {
+                return Ok(v.clone());
+            } else {
+                bail!("Unable to find value based on input key {:?}", captures);
+            }
+        }
+        let coerced = input_type.coerce_str(input_str)?;
+        Ok(coerced)
     }
-}
 
-// TODO use only one recursive function so that we can parse dynamicly size
-// arrays without needed to do any funky shit
-fn recurse_abi_outputs(
-    map: &mut HashMap<String, (DynSolType, DynSolValue)>,
-    outputs: Vec<DynSolValue>,
-    queue: &mut VecDeque<String>,
-) {
-    for output in outputs {
+    fn recurse_abi(
+        &mut self,
+        level: String,
+        output_definitions: Vec<Param>,
+        outputs: Vec<DynSolValue>,
+        name_stack: &mut Vec<String>,
+    ) -> anyhow::Result<()> {
+        for (i, output_def) in output_definitions.iter().enumerate() {
+            let mut current_level = level.clone();
+            if !output_def.components.is_empty() {
+                current_level.push_str(".");
+                self.recurse_abi(
+                    current_level,
+                    output_def.components.clone(),
+                    outputs.clone(),
+                    name_stack,
+                )?;
+            } else {
+                current_level.push_str(&output_def.name);
+                name_stack.push(current_level.clone());
+            }
+
+            if let Some(output) = outputs.get(i) {
+                self.save_to_map(output, name_stack)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn save_to_map(
+        &mut self,
+        output: &DynSolValue,
+        name_stack: &mut Vec<String>,
+    ) -> anyhow::Result<()> {
         if let Some(t) = output.as_type() {
             match t {
                 DynSolType::Tuple(_) => {
-                    recurse_abi_outputs(
-                        map,
-                        output.as_tuple().expect("Should be tuple").to_vec(),
-                        queue,
-                    );
+                    self.recurse_abi_outputs(
+                        output.as_tuple().expect("should be tuple").to_vec(),
+                        name_stack,
+                    )?;
                 }
                 DynSolType::Array(_) => {
-                    recurse_abi_outputs(
-                        map,
-                        output.as_array().expect("Should be array").to_vec(),
-                        queue,
-                    );
+                    self.recurse_abi_outputs(
+                        output.as_array().expect("should be array").to_vec(),
+                        name_stack,
+                    )?;
                 }
                 DynSolType::FixedArray(_, _) => {
-                    recurse_abi_outputs(
-                        map,
+                    self.recurse_abi_outputs(
                         output
                             .as_fixed_array()
                             .expect("Should be fixed array")
                             .to_vec(),
-                        queue,
-                    );
+                        name_stack,
+                    )?;
                 }
                 t => {
-                    let name = queue.pop_back().unwrap();
-                    map.insert(name, (t, output));
+                    if let Some(name) = name_stack.pop() {
+                        self.output_data.insert(name, (t, output.clone()));
+                    }
                 }
             }
         }
+        Ok(())
     }
-}
 
-fn recurse_abi_definition(
-    level: String,
-    output_definition: Vec<Param>,
-    queue: &mut VecDeque<String>,
-) {
-    for output in output_definition {
-        let mut lev = level.clone();
-        if !output.components.is_empty() {
-            lev.push_str(".");
-            recurse_abi_definition(lev, output.components, queue);
-        } else {
-            lev.push_str(&output.name);
-            queue.push_front(lev.clone());
+    fn recurse_abi_outputs(
+        &mut self,
+        outputs: Vec<DynSolValue>,
+        name_stack: &mut Vec<String>,
+    ) -> anyhow::Result<()> {
+        for output in outputs {
+            self.save_to_map(&output, name_stack)?;
         }
+        Ok(())
     }
 }
