@@ -6,7 +6,6 @@ use anyhow::bail;
 use regex::Regex;
 use std::collections::HashMap;
 
-// TODO make sure this works with dynamically sized arrays
 #[derive(Debug)]
 pub struct OutputCollector {
     output_data: HashMap<String, (DynSolType, DynSolValue)>,
@@ -96,22 +95,25 @@ impl OutputCollector {
                         name_stack,
                     )?;
                 }
-                DynSolType::Array(_) => {
-                    self.recurse_abi_outputs(
-                        output.as_array().expect("should be array").to_vec(),
-                        name_stack,
-                    )?;
-                }
-                DynSolType::FixedArray(_, _) => {
-                    self.recurse_abi_outputs(
-                        output
+                DynSolType::Array(_) | DynSolType::FixedArray(_, _) => {
+                    let elements = match t {
+                        DynSolType::Array(_) => {
+                            output.as_array().expect("should be array").to_vec()
+                        }
+                        DynSolType::FixedArray(_, _) => output
                             .as_fixed_array()
-                            .expect("Should be fixed array")
+                            .expect("should be fixed array")
                             .to_vec(),
-                        name_stack,
-                    )?;
+                        _ => unreachable!(),
+                    };
+                    for (index, element) in elements.into_iter().enumerate() {
+                        let mut indexed_name_stack = name_stack.clone();
+                        let last_name = indexed_name_stack.pop().unwrap();
+                        indexed_name_stack.push(format!("{}[{}]", last_name, index));
+                        self.save_to_map(&element, &mut indexed_name_stack)?;
+                    }
                 }
-                t => {
+                _ => {
                     if let Some(name) = name_stack.pop() {
                         self.output_data.insert(name, (t, output.clone()));
                     }
