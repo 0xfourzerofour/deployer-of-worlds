@@ -1,6 +1,6 @@
 # deployer-of-worlds
 
-A config driven smart contract deployment and execution framework for repeatable to deterministic actions.
+A config driven smart contract deployment and execution framework for repeatable and deterministic actions.
 
 ## Example Config
 
