@@ -5,7 +5,7 @@ use alloy::{
 
 pub fn generate_initcode(
     abi: JsonAbi,
-    bytecode: Bytes,
+    _bytecode: Bytes,
     constructor_args: Vec<Param>,
 ) -> anyhow::Result<Bytes> {
     if let Some(constructor) = abi.constructor {

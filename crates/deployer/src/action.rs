@@ -34,12 +34,12 @@ pub struct WriteData {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct WriteCondition {
-    action_id: String,
-    cmp: CpmOption,
+    pub action_id: String,
+    pub cmp: CpmOption,
 }
 
 #[derive(Debug, Clone, Deserialize)]
-enum CpmOption {
+pub enum CpmOption {
     Neq,
     Eq,
     Gt,
@@ -60,33 +60,6 @@ pub struct Action {
     pub depends_on: Option<Vec<String>>,
     pub id: String,
     pub action_data: ActionData,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum OutputSchemaType {
-    Address,
-    Bool,
-    Bytes,
-    String,
-    UInt8,
-    UInt16,
-    UInt32,
-    UInt64,
-    UInt128,
-    UInt256,
-    Int8,
-    Int16,
-    Int32,
-    Int64,
-    Int128,
-    Int256,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct OutputSchema {
-    pub output_type: OutputSchemaType,
-    pub properties: Option<HashMap<String, OutputSchema>>,
 }
 
 pub fn load_actions(path: &str) -> anyhow::Result<Vec<Action>> {
