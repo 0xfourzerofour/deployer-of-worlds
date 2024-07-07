@@ -1,12 +1,13 @@
 use crate::{
     action::{ActionData, DeploymentData, ReadData, WriteData},
-    parser::OutputCollector,
+    indexer::Indexer,
 };
 use std::sync::Arc;
 
 use alloy::{
     contract::CallBuilder,
     dyn_abi::{DynSolType, DynSolValue, JsonAbiExt},
+    json_abi::{AbiItem, Function},
     primitives::{Address, Bytes},
     providers::Provider,
 };
@@ -16,7 +17,7 @@ use crate::action::Action;
 #[derive(Debug)]
 pub struct Executor<P> {
     provider: Arc<P>,
-    output_data: OutputCollector,
+    indexer: Indexer,
     actions: Vec<Action>,
 }
 
@@ -27,7 +28,7 @@ where
     pub fn new(provider: P) -> Self {
         Self {
             provider: Arc::new(provider),
-            output_data: OutputCollector::new(),
+            indexer: Indexer::new(),
             actions: vec![],
         }
     }
@@ -45,17 +46,19 @@ where
 
     async fn read(&mut self, id: String, data: &ReadData) -> anyhow::Result<()> {
         let to: Address = data.address.parse()?;
-
+        let item: AbiItem = data.function_signature.parse()?;
+        println!("item {:?}", item);
+        let function: Function = data.function_signature.parse()?;
+        println!("function {:?}", function);
         let dyn_args: Vec<DynSolValue> = data
             .args
             .iter()
             .enumerate()
             .map(|(i, arg)| {
-                let sol_type =
-                    DynSolType::parse(&data.function.inputs[i].ty).expect("Invalid type");
+                let sol_type = DynSolType::parse(&function.inputs[i].ty).expect("Invalid type");
 
                 let val = self
-                    .output_data
+                    .indexer
                     .get_input_value(arg, sol_type)
                     .expect("Should be dynamic value or valid static type");
 
@@ -63,15 +66,15 @@ where
             })
             .collect();
 
-        let input = data.function.abi_encode_input(&dyn_args)?;
+        let input = function.abi_encode_input(&dyn_args)?;
         let read_output = CallBuilder::new_raw(self.provider.clone(), Bytes::from(input))
             .to(to)
             .call_raw()
-            .with_decoder(&data.function)
+            .with_decoder(&function)
             .await?;
 
-        self.output_data
-            .save_output_data(id, data.function.outputs.clone(), read_output)?;
+        self.indexer
+            .save_output_data(id, function.outputs.clone(), read_output)?;
 
         Ok(())
     }

@@ -3,10 +3,7 @@ use std::{
     fs,
 };
 
-use alloy::{
-    json_abi::{Constructor, Function},
-    primitives::{Bytes, U256},
-};
+use alloy::{json_abi::Constructor, primitives::U256};
 use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
@@ -29,7 +26,7 @@ pub struct DeploymentData {
 #[derive(Debug, Clone, Deserialize)]
 pub struct WriteData {
     pub address: String,
-    pub function: Function,
+    pub function_signature: String,
     pub args: Vec<String>,
     pub value: U256,
     pub condition: Option<WriteCondition>,
@@ -55,7 +52,7 @@ enum CpmOption {
 pub struct ReadData {
     pub address: String,
     pub args: Vec<String>,
-    pub function: Function,
+    pub function_signature: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
