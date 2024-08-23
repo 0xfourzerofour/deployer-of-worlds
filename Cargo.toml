@@ -24,6 +24,6 @@ alloy = { version = "0.2.0", features = [
 ] }
 anyhow = "1.0.83"
 serde = "1.0.0"
-serde_json = "1.0.0"
+serde_yaml = "0.9.34"
 tokio = { version = "1.37.0", features = ["full"] }
 dotenv = "0.15.0"

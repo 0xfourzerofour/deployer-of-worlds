@@ -32,7 +32,6 @@ impl Indexer {
             self.index_output(id.clone(), output_def, output)?;
         }
 
-        println!("{:?}", self.output_data);
         Ok(())
     }
 

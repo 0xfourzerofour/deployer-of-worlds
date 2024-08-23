@@ -1,10 +1,3 @@
-![banner](./data/banner.png)
-
-A config driven smart contract deployment and execution framework for repeatable to deterministic actions.
-
-## Example Config
-
-```yml
 variables:
   proxy_address:
     ty: address
@@ -39,16 +32,3 @@ actions:
           - !var proxy_address
         value:
           - !var min_value
-
-
-```
-
-
-## TODO
-
-- Input validation based on id's and output schema based on jq queries 
-- Generate init code based on input abi and constructor args
-- Conditional Execution logic based on on-chain read funcitonality
-- CREATE2 Deployer implementation for contract deployment
-- CLI tool to allow for arbitrary json inputs to be executed
-- Use Create2 deployer factory and bind rust types to it (here)[https://github.com/pcaversaccio/createx]

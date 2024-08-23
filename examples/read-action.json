@@ -1,4 +1,11 @@
-[
+{
+  "variables": {
+    "contract_address": {
+      "ty": "address",
+      "value": "0x4f84a207A80c39E9e8BaE717c1F25bA7AD1fB08F",
+    }
+  },
+  "actions": [
   {
     "id": "read_entrypoint_deposit_info",
     "action_data": {
@@ -26,4 +33,5 @@
       }
     }
   }
-]
+  ]
+}

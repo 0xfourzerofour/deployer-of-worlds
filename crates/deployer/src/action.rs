@@ -64,7 +64,7 @@ pub struct Action {
 
 pub fn load_actions(path: &str) -> anyhow::Result<Vec<Action>> {
     let contents = fs::read_to_string(path).expect("Should have been able to read the file");
-    let actions: Vec<Action> = serde_json::from_str(&contents)?;
+    let actions: Vec<Action> = serde_yaml::from_str(&contents)?;
     let sorted = topological_sort(actions)?;
 
     Ok(sorted)
