@@ -29,4 +29,4 @@ actions:
         abi_item: "function deposit(address owner) payable"
         args:
           - !var proxy_address
-        value: !var min_value
+        value: !output read_entrypoint_deposit_info.balance
