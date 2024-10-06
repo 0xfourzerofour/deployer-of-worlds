@@ -1,7 +1,7 @@
 use alloy::providers::ProviderBuilder;
 use alloy::rpc::client::ClientBuilder;
 use anyhow::Result;
-use deployer::action::load_actions;
+use deployer::config::config::Config;
 use deployer::executor::Executor;
 use dotenv::dotenv;
 use url::Url;
@@ -13,8 +13,8 @@ async fn main() -> Result<()> {
     let client = ClientBuilder::default().http(Url::parse(&rpc_url)?);
     let provider = ProviderBuilder::new().on_client(client);
     let mut executor = Executor::new(provider.boxed());
-    let actions = load_actions("./examples/read-action.json")?;
-    executor.register_actions(actions);
+    let config = Config::load_from_file("./examples/read-actions.yml")?;
+    executor.register_config(config);
     executor.execute_actions().await?;
 
     Ok(())

@@ -3,19 +3,35 @@ use alloy::{
     json_abi::Param,
 };
 use anyhow::bail;
-use regex::Regex;
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 #[derive(Debug)]
 pub struct Indexer {
     output_data: HashMap<String, (DynSolType, DynSolValue)>,
+    variables: HashMap<String, (DynSolType, DynSolValue)>,
 }
 
 impl Indexer {
     pub fn new() -> Indexer {
         Indexer {
             output_data: HashMap::new(),
+            variables: HashMap::new(),
         }
+    }
+
+    pub fn get_variable_value(&self, key: &str) -> anyhow::Result<DynSolValue> {
+        let (_data, val) = self
+            .variables
+            .get(key)
+            .expect(&format!("No variable been indexed for {}", key));
+        Ok(val.clone())
+    }
+
+    pub fn save_variable(&mut self, key: &str, ty: &str, value: &str) -> anyhow::Result<()> {
+        let dyn_type = DynSolType::from_str(ty)?;
+        let val = dyn_type.coerce_str(value)?;
+        self.variables.insert(key.to_string(), (dyn_type, val));
+        Ok(())
     }
 
     pub fn save_output_data(
@@ -35,22 +51,12 @@ impl Indexer {
         Ok(())
     }
 
-    pub fn get_input_value(
-        &self,
-        input_str: &str,
-        input_type: DynSolType,
-    ) -> anyhow::Result<DynSolValue> {
-        let re = Regex::new(r"\$\{([^\}]+)\}")?;
-        if let Some(captures) = re.captures(&input_str) {
-            let inner_string = captures.get(1).unwrap().as_str();
-            if let Some((_t, v)) = self.output_data.get(inner_string) {
-                return Ok(v.clone());
-            } else {
-                bail!("Unable to find value based on input key {:?}", captures);
-            }
-        }
-        let coerced = input_type.coerce_str(input_str)?;
-        Ok(coerced)
+    pub fn get_output_value(&self, input_str: &str) -> anyhow::Result<DynSolValue> {
+        let (_data, val) = self.output_data.get(input_str).expect(&format!(
+            "No output data has been indexed for {}",
+            input_str
+        ));
+        Ok(val.clone())
     }
 
     fn index_output(
