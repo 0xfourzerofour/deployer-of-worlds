@@ -24,7 +24,7 @@ actions:
       type: "read"
       content:
         address: !var entry_point  
-        function_signature: "function balanceOf(address owner) view returns (uint256 balance)"
+        abi_item: "function balanceOf(address owner) view returns (uint256 balance)"
         args:
           - !var proxy_address 
 
@@ -32,15 +32,11 @@ actions:
     action_data:
       type: "write"
       content:
-        address: !var entrypoint
-        function_signature: "function deposit(address owner) payable"
-        condition: "!out read_entrypoint_deposit_info <= !var min_value"  
+        address: !var entry_point
+        abi_item: "function deposit(address owner) payable"
         args:
           - !var proxy_address
-        value:
-          - !var min_value
-
-
+        value: !output read_entrypoint_deposit_info.balance
 ```
 
 
