@@ -1,29 +1,39 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 
 use alloy::{
-    json_abi::{JsonAbi, Param},
+    dyn_abi::{DynSolValue, JsonAbiExt},
+    json_abi::JsonAbi,
     primitives::Bytes,
 };
 
-use crate::config::config::ConfigAction;
+use deployer_core::Action;
 
 pub fn generate_initcode(
     abi: JsonAbi,
-    _bytecode: Bytes,
-    constructor_args: Vec<Param>,
+    bytecode: Bytes,
+    constructor_args: Vec<alloy::dyn_abi::DynSolValue>,
 ) -> anyhow::Result<Bytes> {
+    let mut initcode = bytecode.to_vec();
+
     if let Some(constructor) = abi.constructor {
         if constructor_args.len() != constructor.inputs.len() {
-            anyhow::bail!("Input length an constructor args length are not the same");
+            anyhow::bail!("Constructor args length ({}) doesn't match ABI inputs length ({})", 
+                constructor_args.len(), constructor.inputs.len());
         }
+
+        // Encode constructor arguments
+        let encoded_args = constructor.abi_encode_input(&constructor_args)?;
+        initcode.extend_from_slice(&encoded_args);
+    } else if !constructor_args.is_empty() {
+        anyhow::bail!("Constructor args provided but contract has no constructor");
     }
 
-    Ok(Bytes::new())
+    Ok(Bytes::from(initcode))
 }
 
-pub fn topological_sort(actions: Vec<ConfigAction>) -> anyhow::Result<Vec<ConfigAction>> {
+pub fn topological_sort(actions: Vec<Action>) -> anyhow::Result<Vec<Action>> {
     // Map each action id to its corresponding Action object
-    let mut action_map: HashMap<String, ConfigAction> = HashMap::new();
+    let mut action_map: HashMap<String, Action> = HashMap::new();
     for action in actions.clone() {
         action_map.insert(action.id.clone(), action);
     }

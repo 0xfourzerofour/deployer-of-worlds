@@ -1,0 +1,66 @@
+# Pipeline: Deploy Simple Ownership Contract on Mainnet
+# This demonstrates clean separation of concerns:
+# - Local variables specific to this deployment
+# - Shared variables from mainnet.yml  
+# - Contract data from external file
+
+# Local variables (specific to this pipeline)
+variables:
+  # Pipeline-specific salt for deterministic deployment
+  ownership_salt:
+    ty: bytes32
+    value: "0x0000000000000000000000000000000000000000000000000000000000000001"
+  
+  # Initial owner for this specific deployment
+  initial_owner:
+    ty: address
+    value: "0x742d35Cc6634C0532925a3b8D8C0532925a3b8D8"
+
+# References to external data sources
+data:
+  # Shared mainnet variables (create2_deployer, etc.)
+  mainnet_vars:
+    type: variables
+    path: "variables/mainnet"
+  
+  # Contract bytecode and ABI
+  ownership_contract:
+    type: contract
+    path: "contracts/SimpleOwnership"
+
+# Clean execution logic
+actions:
+  - id: "deploy_ownership"
+    action_data:
+      type: "deploy"
+      content:
+        address: !var create2_deployer  # From mainnet_vars
+        salt: !var ownership_salt        # Local variable
+        constructor_abi_item: "constructor()"
+        constructor_args: []
+        bytecode: !data ownership_contract.bytecode
+
+  - id: "verify_owner"
+    depends_on: ["deploy_ownership"]
+    action_data:
+      type: "read"
+      content:
+        address: !output deploy_ownership
+        abi_item: "function owner() view returns (address)"
+        args: []
+
+  - id: "transfer_ownership"
+    depends_on: ["verify_owner"]
+    action_data:
+      type: "write"
+      content:
+        address: !output deploy_ownership
+        abi_item: "function transferOwnership(address newOwner)"
+        args:
+          - !var initial_owner  # Local variable
+        value: "0"
+
+metadata:
+  description: "Deploy and configure ownership contract on mainnet"
+  network: "mainnet"
+  version: "1.0.0"

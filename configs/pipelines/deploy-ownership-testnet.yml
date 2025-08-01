@@ -1,0 +1,42 @@
+variables:
+  ownership_salt:
+    ty: bytes32
+    value: "0x0000000000000000000000000000000000000000000000000000000000000002"
+  
+  initial_owner:
+    ty: address
+    value: "0x742d35Cc6634C0532925a3b8D8C0532925a3b8D8"
+
+data:
+  testnet_vars:
+    type: variables
+    path: "variables/testnet"
+  
+  ownership_contract:
+    type: contract
+    path: "contracts/SimpleOwnership"
+
+actions:
+  - id: "deploy_ownership"
+    action_data:
+      type: "deploy"
+      content:
+        address: !var create2_deployer  # From testnet_vars (different address)
+        salt: !var ownership_salt        # Different salt than mainnet
+        constructor_abi_item: "constructor()"
+        constructor_args: []
+        bytecode: !data ownership_contract.bytecode
+
+  - id: "verify_owner"
+    depends_on: ["deploy_ownership"]
+    action_data:
+      type: "read"
+      content:
+        address: !output deploy_ownership
+        abi_item: "function owner() view returns (address)"
+        args: []
+
+metadata:
+  description: "Deploy and configure ownership contract on testnet"
+  network: "testnet"
+  version: "1.0.0"

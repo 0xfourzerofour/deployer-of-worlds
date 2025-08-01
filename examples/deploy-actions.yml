@@ -1,0 +1,39 @@
+verification:
+  enabled: true
+  url: https://example.com/verification
+
+variables:
+  modular_account_factory_address:
+    ty: address
+    default_value: "0x4f84a207A80c39E9e8BaE717c1F25bA7AD1fB08F"
+
+  modular_account_factory_salt:
+    ty: bytes32
+
+  modular_account_factory_impl:
+    ty: bytes32
+
+  entry_point:
+    ty: address
+    default_value: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"
+
+actions:
+  - id: "allow_list_module"
+    action_data:
+      type: "deploy"
+      content:
+        address: !var modular_account_factory_address  
+        salt: !var salt
+        constructor: "constructor(address entryPoint)"
+        args:
+          - !var entry_point 
+
+  - id: "deploy_modular_account_factory"
+    action_data:
+      type: "deploy"
+      content:
+        address: !var modular_account_factory_address  
+        salt: !var salt
+        constructor: "constructor(address entryPoint)"
+        args:
+          - !var entry_point 

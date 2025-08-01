@@ -4,6 +4,7 @@ use alloy::{
 };
 use anyhow::bail;
 use std::{collections::HashMap, str::FromStr};
+use deployer_core::{DeployerError, Result, VariableResolver};
 
 #[derive(Debug)]
 pub struct Indexer {
@@ -67,6 +68,8 @@ impl Indexer {
     ) -> anyhow::Result<()> {
         let current_level = if prefix.is_empty() {
             output_def.name.clone()
+        } else if output_def.name.is_empty() {
+            prefix // For synthetic outputs with empty names, use just the prefix
         } else {
             format!("{}.{}", prefix, output_def.name)
         };
@@ -101,5 +104,23 @@ impl Indexer {
             }
         }
         Ok(())
+    }
+}
+
+impl VariableResolver for Indexer {
+    fn get_variable(&self, key: &str) -> Result<DynSolValue> {
+        self.get_variable_value(key)
+            .map_err(|_| DeployerError::VariableNotFound(key.to_string()))
+    }
+
+    fn get_output(&self, id: &str) -> Result<DynSolValue> {
+        self.get_output_value(id)
+            .map_err(|_| DeployerError::OutputNotFound(id.to_string()))
+    }
+
+    fn get_data(&self, _path: &str) -> Result<DynSolValue> {
+        // For now, the basic indexer doesn't support data references
+        // This would be implemented by a higher-level resolver that has access to data files
+        Err(DeployerError::Config("Data references not supported by basic indexer".to_string()))
     }
 }

@@ -1,7 +1,7 @@
 [workspace]
-members = ["bin", "crates/*"]
+members = ["bin/*", "crates/*"]
 
-default-members = ["bin"]
+default-members = ["bin/deployer-of-worlds"]
 resolver = "2"
 
 [workspace.package]
@@ -12,7 +12,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/0xfourzerofour/deployer-of-worlds"
 
 [workspace.dependencies]
-alloy = { version = "0.2.0", features = [
+alloy = { version = "1.0.23", features = [
   "serde",
   "transport-http",
   "std",
@@ -27,3 +27,5 @@ serde = "1.0.0"
 serde_yaml = "0.9.34"
 tokio = { version = "1.37.0", features = ["full"] }
 dotenv = "0.15.0"
+thiserror = "1.0"
+serde_json = "1.0"
