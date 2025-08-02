@@ -122,6 +122,7 @@ async fn execute_pipeline(
     match execute_config(
         config.clone(),
         &state.rpc_url,
+        &state.data_dir,
         request.dry_run.unwrap_or(false),
     )
     .await
@@ -154,12 +155,14 @@ async fn execute_one_off(
     // Create temporary config from request
     let config = Config {
         variables: request.variables,
+        data: HashMap::new(), // No data references for one-off pipelines
         actions: request.actions,
     };
 
     match execute_config(
         config.clone(),
         &state.rpc_url,
+        &state.data_dir,
         request.dry_run.unwrap_or(false),
     )
     .await
@@ -180,7 +183,7 @@ async fn execute_one_off(
     }
 }
 
-async fn execute_config(config: Config, rpc_url: &str, dry_run: bool) -> Result<String> {
+async fn execute_config(config: Config, rpc_url: &str, data_dir: &str, dry_run: bool) -> Result<String> {
     let execution_id = uuid::Uuid::new_v4().to_string();
 
     if dry_run {
@@ -200,7 +203,7 @@ async fn execute_config(config: Config, rpc_url: &str, dry_run: bool) -> Result<
     // Create provider
     let provider = ProviderBuilder::new().connect_http(rpc_url.parse()?);
 
-    // Create executor and run
+    // Create executor with data directory
     let mut executor = Executor::new(provider);
     executor.register_config(config)?;
     executor.execute_actions().await?;

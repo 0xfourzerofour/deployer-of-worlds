@@ -77,8 +77,9 @@ impl Cli {
                 .wallet(wallet)
                 .connect_http(self.rpc_url.parse()?);
 
-            // Create executor and run
-            let mut executor = Executor::new(provider);
+            // Create executor with data directory
+            let data_dir = PathBuf::from(&self.data_dir).join("data");
+            let mut executor = Executor::with_data_dir(provider, data_dir);
             executor.register_config(config)?;
             executor.execute_actions().await?;
         }

@@ -5,7 +5,7 @@ use alloy::{
     providers::{network::TransactionBuilder, Provider},
     rpc::types::TransactionRequest,
 };
-use deployer_core::{WriteData, VariableResolver};
+use deployer_core::{VariableResolver, WriteData};
 use std::sync::Arc;
 
 pub struct WriteExecutor<P> {
@@ -25,6 +25,18 @@ where
         data: &WriteData,
         resolver: &R,
     ) -> anyhow::Result<()> {
+        // // Check condition if present
+        // if let Some(condition) = &data.condition {
+        //     let should_execute = condition.evaluate(&self.provider, resolver).await
+        //         .map_err(|e| anyhow::anyhow!("Failed to evaluate condition: {:?}", e))?;
+
+        //     if !should_execute {
+        //         println!("Condition not met, skipping write action");
+        //         return Ok(());
+        //     }
+
+        //     println!("Condition met, executing write action");
+        // }
         let function: Function = data.abi_item.parse()?;
         let address = data
             .address
@@ -59,11 +71,10 @@ where
             .with_value(value.0)
             .with_input(Bytes::from(input));
 
-        println!("TX to send {:?}", tx);
+        let pending_tx = self.provider.send_transaction(tx).await?;
+        let receipt = pending_tx.get_receipt().await?;
 
-        // In production, you would send the transaction here:
-        // let pending_tx = self.provider.send_transaction(tx).await?;
-        // let receipt = pending_tx.get_receipt().await?;
+        println!("{:?}", receipt);
 
         Ok(())
     }

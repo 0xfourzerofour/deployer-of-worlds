@@ -1,0 +1,74 @@
+variables:
+  factory_salt:
+    ty: bytes32
+    value: "0x0000000000000000000000000000000000000000000000000000000000000002"
+  
+  factory_address:
+    ty: address
+    value: "0xb52f27356cd10f5b5d03840cb2fceef3a30f6fb2"
+  
+  factory_owner:
+    ty: address
+    value: "0x7EB5794a9cC3132a2911680a94ca1aEDe8D39294"
+  
+  entrypoint_address:
+    ty: address
+    value: "0x0000000071727de22e5e9d8baf0edac6f37da032"
+  
+  unstake_delay:
+    ty: uint32
+    value: "86400"
+  
+  stake_amount:
+    ty: uint256
+    value: "1000000000000000"
+
+data:
+  factory_contract:
+    type: contract
+    path: "contracts/LightAccountFactory"
+
+actions:
+  - id: "deploy_factory"
+    action_data:
+      type: "deploy"
+      content:
+        address: !var factory_address 
+        salt: !var factory_salt
+        constructor_abi_item: "constructor(address,address)"
+        constructor_args:
+          - !var factory_owner
+          - !var entrypoint_address
+        bytecode: !data factory_contract.bytecode.object
+
+  # - id: "read_stake"
+  #   depends_on: ["deploy_factory"]
+  #   action_data:
+  #     type: "deploy"
+  #     content:
+  #       address: !var factory_address 
+  #       salt: !var factory_salt
+  #       constructor_abi_item: "constructor(address,address)"
+  #       constructor_args:
+  #         - !var factory_owner
+  #         - !var entrypoint_address
+  #       bytecode: !data factory_contract.bytecode.object
+
+  - id: "add_stake"
+    depends_on: ["deploy_factory"]
+    action_data:
+      type: "write"
+      content:
+        address: !output deploy_factory
+        abi_item: "function addStake(uint32,uint256)"
+        args:
+          - !var unstake_delay
+          - !var stake_amount
+        value: !var stake_amount
+        # condition:
+        #   type: output_comparison
+        #   output_ref: "read_stake"
+        #   comparison:
+        #     operator: lt
+        #     value: !var stake_amount
+

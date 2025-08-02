@@ -8,6 +8,7 @@ alloy.workspace = true
 anyhow.workspace = true
 serde.workspace = true
 serde_yaml.workspace = true
+toml = { version = "0.8", features = ["preserve_order"] }
 regex = "1.10.5"
 hex = "0.4"
 deployer-core = { path = "../core" }

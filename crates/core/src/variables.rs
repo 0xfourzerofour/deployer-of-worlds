@@ -15,7 +15,7 @@ pub enum VariableValue {
     Var(String),
     Output(String),
     Value(String),
-    Data(String), // New: reference to data files like !data contract.bytecode
+    Data(String),
 }
 
 impl VariableValue {
@@ -27,12 +27,14 @@ impl VariableValue {
         match self {
             VariableValue::Var(key) => resolver.get_variable(key),
             VariableValue::Output(id) => resolver.get_output(id),
-            VariableValue::Value(value) => expected_type
-                .coerce_str(value)
-                .map_err(|_e| DeployerError::TypeConversion {
-                    expected: format!("{:?}", expected_type),
-                    actual: value.clone(),
-                }),
+            VariableValue::Value(value) => {
+                expected_type
+                    .coerce_str(value)
+                    .map_err(|_e| DeployerError::TypeConversion {
+                        expected: format!("{:?}", expected_type),
+                        actual: value.clone(),
+                    })
+            }
             VariableValue::Data(path) => resolver.get_data(path),
         }
     }
